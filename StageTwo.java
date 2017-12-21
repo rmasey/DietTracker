@@ -2,14 +2,20 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import static javafx.geometry.Pos.BASELINE_CENTER;
 
 
 public class StageTwo {
@@ -34,64 +40,46 @@ public class StageTwo {
     public void start(Stage stage) {
 
         Pane root = new Pane();
-        Scene scene = new Scene(root, 1024, 768);
+        Scene scene = new Scene(root, 450, 600);
         scene.getStylesheets().add("style.css");
         stage.setTitle("Add New User");
         stage.setScene(scene);
         stage.setOnCloseRequest((WindowEvent we) -> closeStage(stage));
         stage.show();
 
-        Button btn = new Button();
-        btn.setText("Add new item");
-        btn.setLayoutX(350);
-        btn.setLayoutY(50);
-        btn.setOnAction((ActionEvent ae) -> addNewItem(stage));
-        root.getChildren().add(btn);
+        Image image = new Image("/Images/logo.png");
+        ImageView iv1 = new ImageView();
+        iv1.setImage(image);
+        iv1.setFitHeight(100);
+        iv1.setPreserveRatio(true);
 
         Label label = new Label("Tell Us About Yourself");
-        label.setLayoutX(350);
-        label.setLayoutY(150);
-        root.getChildren().add(label);
-
         txtFieldFName = new TextField();
-        txtFieldFName.setLayoutX(400);
-        txtFieldFName.setLayoutY(200);
-        txtFieldFName.setPromptText("Enter First Name");
-        root.getChildren().add(txtFieldFName);
-
+        txtFieldFName.setPromptText("First Name");
         txtFieldLName = new TextField();
-        txtFieldLName.setLayoutX(400);
-        txtFieldLName.setLayoutY(250);
-        txtFieldLName.setPromptText("Enter last name");
-        root.getChildren().add(txtFieldLName);
-
+        txtFieldLName.setPromptText("Last name");
         txtFieldStartWeight = new TextField();
-        txtFieldStartWeight.setLayoutX(400);
-        txtFieldStartWeight.setLayoutY(300);
-        txtFieldStartWeight.setPromptText("Enter start weight");
-        root.getChildren().add(txtFieldStartWeight);
-
-
+        txtFieldStartWeight.setPromptText("Start weight in KG");
         txtFieldTargetWeight = new TextField();
-        txtFieldTargetWeight.setLayoutX(400);
-        txtFieldTargetWeight.setLayoutY(350);
-        txtFieldTargetWeight.setPromptText("Enter target weight");
-        root.getChildren().add(txtFieldTargetWeight);
-
-
+        txtFieldTargetWeight.setPromptText("Target weight in KG");
         txtFieldKCalPerDay = new TextField();
-        txtFieldKCalPerDay.setLayoutX(400);
-        txtFieldKCalPerDay.setLayoutY(400);
-        txtFieldKCalPerDay.setPromptText("Enter calories per day");
-        root.getChildren().add(txtFieldKCalPerDay);
+        txtFieldKCalPerDay.setPromptText("Maximum calories per day");
 
         ObservableList options = FXCollections.observableArrayList("Male", "Female");
         comboBox = new ComboBox(options);
-        comboBox.getSelectionModel().select(0);
-        comboBox.setLayoutX(400);
-        comboBox.setLayoutY(450);
-        root.getChildren().add(comboBox);
+        comboBox.setPrefWidth(350);
+        comboBox.setPromptText("Select your gender");
 
+        Button createUserBtn = new Button();
+        createUserBtn.setText("CREATE NEW USER");
+        createUserBtn.setOnAction((ActionEvent ae) -> addNewItem(stage));
+
+        VBox vb = new VBox(iv1, label, txtFieldFName, txtFieldLName, txtFieldStartWeight, txtFieldTargetWeight, txtFieldKCalPerDay, comboBox, createUserBtn);
+        vb.setPadding(new Insets(10, 50, 50, 50));
+        vb.setSpacing(10);
+        vb.setAlignment(BASELINE_CENTER);
+
+        root.getChildren().add(vb);
     }
 
     private void addNewItem(Stage stage) {
@@ -103,18 +91,14 @@ public class StageTwo {
         int KCalPerDay = Integer.parseInt(txtFieldKCalPerDay.getText());
         String gender = (String) comboBox.getValue();
 
-        UserService.save(new User(1, firstName, lastName, startWeight,targetWeight, KCalPerDay, gender));
+        UserService.save(new User(1, firstName, lastName, startWeight, targetWeight, KCalPerDay, gender));
 
-      closeStage(stage);
+        closeStage(stage);
     }
-
 
     private void closeStage(Stage stage) {
         parent.setDisable(false);
         stage.close();
-
-        StageOne.getListofUsers();
     }
-
 
 }

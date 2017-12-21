@@ -1,13 +1,25 @@
 .root{
 	-fx-background-color: #003A5F;
-	-fx-font: "impact";
+	-fx-font: 'impact';
 	-fx-font-size: 11pt;
 }
 
 .combo-box-base  {
 	-fx-background-color: white;
 
-	-fx-text-fill: -fx-text-base-color;
-	-fx-padding: 3 0 2 7;
-	-fx-cell-size: 1.66667em;
 }
+
+.button {
+	-fx-font: 'Arial';
+	-fx-padding: 10;
+	-fx-background-color: #FFFFFF;
+	-fx-text-fill: #2F98D1;
+	-fx-font-size: 10pt;
+
+}
+
+.label {
+	-fx-font: 'Arial';
+	-fx-text-fill: #2F98D1;
+}
+
