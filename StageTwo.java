@@ -35,6 +35,7 @@ public class StageTwo {
 
         Pane root = new Pane();
         Scene scene = new Scene(root, 1024, 768);
+        scene.getStylesheets().add("style.css");
         stage.setTitle("Add New User");
         stage.setScene(scene);
         stage.setOnCloseRequest((WindowEvent we) -> closeStage(stage));

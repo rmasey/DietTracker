@@ -1,0 +1,13 @@
+.root{
+	-fx-background-color: #003A5F;
+	-fx-font: "impact";
+	-fx-font-size: 11pt;
+}
+
+.combo-box-base  {
+	-fx-background-color: white;
+
+	-fx-text-fill: -fx-text-base-color;
+	-fx-padding: 3 0 2 7;
+	-fx-cell-size: 1.66667em;
+}
