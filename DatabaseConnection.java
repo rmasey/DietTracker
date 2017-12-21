@@ -15,7 +15,7 @@ public class DatabaseConnection {
         {
             SQLiteConfig config = new SQLiteConfig();
             config.enforceForeignKeys(true);
-            Class.forName("org.sqlite.JDBC");        // ... a missing driver class ...
+            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile, config.toProperties());
             System.out.println("Database connection successfully established.");
         }

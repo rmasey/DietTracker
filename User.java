@@ -22,20 +22,12 @@ public class User {
         this.gender = gender;
     }
 
-
-
     @Override
     public String toString() {
-        return "User{" +
-                "userID=" + userID +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", startWeight=" + startWeight +
-                ", targetWeight=" + targetWeight +
-                ", caloriesPerDay=" + caloriesPerDay +
-                ", gender='" + gender + '\'' +
-                '}';
+        return firstName + " " + lastName;
     }
+
+
 
     public int getUserID() {
         return userID;
