@@ -14,6 +14,7 @@ import java.util.List;
 public class StageOne extends Application {
 
     public static DatabaseConnection database;
+    public static Pane root;
 
     public static void main(String[] args) {
 
@@ -27,21 +28,18 @@ public class StageOne extends Application {
 
         //UserService.deleteById(1, database);
 
-        Pane root = new Pane();
-        Scene scene = new Scene(root, 1024, 768);
+        root = new Pane();
+        Scene scene = new Scene(root, 600, 500);
         stageOne.setTitle("Diet Tracker");
         stageOne.setScene(scene);
         stageOne.show();
 
-        List<User> allTheUsers = UserService.selectAll();
-        ObservableList options = FXCollections.observableArrayList(allTheUsers);
-        ComboBox comboBox = new ComboBox(options);
-        comboBox.getSelectionModel().select(0);
-
-        root.getChildren().add(comboBox);
+        getListofUsers();
 
         Button myButton = new Button("Add new user!");
         myButton.setPrefSize(100, 35);
+        myButton.setLayoutX(300);
+        myButton.setLayoutY(450);
         myButton.setOnAction((ActionEvent ae) -> openNewStage(root));
         root.getChildren().add(myButton);
     }
@@ -49,6 +47,17 @@ public class StageOne extends Application {
     public static void openNewStage(Pane parent) {
         StageTwo newStage = new StageTwo(parent);
     }
+
+    public static void getListofUsers() {
+        List<User> allTheUsers = UserService.selectAll();
+        ObservableList options = FXCollections.observableArrayList(allTheUsers);
+        ComboBox comboBox = new ComboBox(options);
+        comboBox.getSelectionModel().select(0);
+        comboBox.setLayoutX(300);
+        comboBox.setLayoutY(100);
+        root.getChildren().add(comboBox);
+    }
+
 
 
 }

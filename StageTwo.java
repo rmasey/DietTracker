@@ -44,7 +44,7 @@ public class StageTwo {
         btn.setText("Add new item");
         btn.setLayoutX(350);
         btn.setLayoutY(50);
-        btn.setOnAction((ActionEvent ae) -> addNewItem());
+        btn.setOnAction((ActionEvent ae) -> addNewItem(stage));
         root.getChildren().add(btn);
 
         Label label = new Label("Tell Us About Yourself");
@@ -87,11 +87,13 @@ public class StageTwo {
         ObservableList options = FXCollections.observableArrayList("Male", "Female");
         comboBox = new ComboBox(options);
         comboBox.getSelectionModel().select(0);
+        comboBox.setLayoutX(400);
+        comboBox.setLayoutY(450);
         root.getChildren().add(comboBox);
+
     }
 
-    private void addNewItem() {
-
+    private void addNewItem(Stage stage) {
 
         String firstName = txtFieldFName.getText();
         String lastName = txtFieldLName.getText();
@@ -102,12 +104,15 @@ public class StageTwo {
 
         UserService.save(new User(1, firstName, lastName, startWeight,targetWeight, KCalPerDay, gender));
 
+      closeStage(stage);
     }
 
 
     private void closeStage(Stage stage) {
         parent.setDisable(false);
         stage.close();
+
+        StageOne.getListofUsers();
     }
 
 
