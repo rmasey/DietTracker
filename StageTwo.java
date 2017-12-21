@@ -99,6 +99,8 @@ public class StageTwo {
     private void closeStage(Stage stage) {
         parent.setDisable(false);
         stage.close();
+
+
     }
 
 }
