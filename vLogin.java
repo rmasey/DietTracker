@@ -19,7 +19,6 @@ import static javafx.geometry.Pos.BASELINE_CENTER;
 public class vLogin extends Application {
 
     public static DatabaseConnection database;  //single connection used across the application
-    //so for ease this is made public
 
     private static Pane root;
     private static ComboBox comboBox;
@@ -75,6 +74,7 @@ public class vLogin extends Application {
         newUserBtn = new Button("NEW USER");
         newUserBtn.setPrefSize(250, 35);
         newUserBtn.setOnAction((ActionEvent ae) -> openNewStage(root));
+
 
         vb = new VBox(iv1, comboBox, loginBtn, newUserBtn);
         vb.setPadding(new Insets(10, 50, 50, 50));
