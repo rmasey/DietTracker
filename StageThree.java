@@ -64,7 +64,7 @@ public class StageThree {
         dp.setValue( LocalDate.now() );
 
 
-        List<Consumption> alltheFood = ConsumptionService.selectAll(selectedUser.getUserID());
+        List<Consumption> alltheFood = ConsumptionDAO.selectAll(selectedUser.getUserID());
         ObservableList options = FXCollections.observableArrayList(alltheFood);
 
         TableView table = new TableView<>();
@@ -113,7 +113,7 @@ public class StageThree {
     }
 
     public static void openStageFour(Pane parent, User selectedUser) {
-        StageFour newStage = new StageFour(parent, selectedUser);
+        TrackWeightView newStage = new TrackWeightView(parent, selectedUser);
 
     }
 

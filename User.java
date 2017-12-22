@@ -2,22 +2,21 @@ public class User {
   private int userID;
   private String firstName;
   private String lastName;
-  private int startWeight;
   private int targetWeight;
   private int caloriesPerDay;
   private String gender;
 
-    public User(int userID, String firstName, String lastName) {
+    public User(int userID, String firstName, String lastName, int targetWeight) {
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.targetWeight = targetWeight;
     }
 
-    public User(int userID, String firstName, String lastName, int startWeight, int targetWeight, int caloriesPerDay, String gender) {
+    public User(int userID, String firstName, String lastName, int targetWeight, int caloriesPerDay, String gender) {
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.startWeight = startWeight;
         this.targetWeight = targetWeight;
         this.caloriesPerDay = caloriesPerDay;
         this.gender = gender;
@@ -52,14 +51,6 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public int getStartWeight() {
-        return startWeight;
-    }
-
-    public void setStartWeight(int startWeight) {
-        this.startWeight = startWeight;
     }
 
     public int getTargetWeight() {

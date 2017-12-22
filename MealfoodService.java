@@ -3,7 +3,6 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 
 
 public class MealfoodService {
@@ -11,13 +10,13 @@ public class MealfoodService {
     public static List<Mealfood> selectByID(int mealfoodID) {
 
         List<Mealfood> targetList = new ArrayList<>();
-        PreparedStatement statement = StageOne.database.newStatement("SELECT MealFoodID, FoodID, MealID, ServingQuantity FROM MealFood WHERE mealFoodID = ?");
+        PreparedStatement statement = LoginView.database.newStatement("SELECT MealFoodID, FoodID, MealID, ServingQuantity FROM MealFood WHERE mealFoodID = ?");
 
         try {
             if (statement != null) {
 
                 statement.setInt(1, mealfoodID);
-                ResultSet results = StageOne.database.executeQuery(statement);
+                ResultSet results = LoginView.database.executeQuery(statement);
 
                 if (results != null) {
                     while (results.next()) {
