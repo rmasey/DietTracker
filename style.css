@@ -23,3 +23,9 @@
 	-fx-text-fill: #2F98D1;
 }
 
+.table-view .table-cell{
+	-fx-text-fill: #2F98D1;
+	-fx-font-size: 9pt;
+}
+}
+

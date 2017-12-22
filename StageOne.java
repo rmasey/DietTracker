@@ -8,9 +8,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.util.List;
 
@@ -20,7 +22,7 @@ import static javafx.geometry.Pos.BASELINE_CENTER;
 public class StageOne extends Application {
 
     public static DatabaseConnection database;  //single connection used across the application
-                                                //so for ease this is made public
+    //so for ease this is made public
 
     private static Pane root;
     private static ComboBox comboBox;
@@ -28,6 +30,8 @@ public class StageOne extends Application {
     private static Button loginBtn;
     private static Button newUserBtn;
     private static VBox vb;
+    private static User selectedUser;
+
 
 
     public static void main(String[] args) {
@@ -47,6 +51,7 @@ public class StageOne extends Application {
         scene.getStylesheets().add("style.css");
         stageOne.setTitle("Diet Tracker");
         stageOne.setScene(scene);
+        stageOne.setOnCloseRequest((WindowEvent we) -> terminate());
         stageOne.show();
 
         Image image = new Image("/Images/logo.png");
@@ -55,18 +60,24 @@ public class StageOne extends Application {
         iv1.setFitHeight(100);
         iv1.setPreserveRatio(true);
 
+        ComboBox<User> comboBox = new ComboBox<>();
+        List<User> allTheUsers = UserService.selectAll();
+        comboBox.getItems().addAll(allTheUsers);
+        comboBox.setPrefWidth(250);
+
+
+        comboBox.setOnAction((event) -> {
+            selectedUser = comboBox.getSelectionModel().getSelectedItem();
+
+        });
+
         loginBtn = new Button("LOGIN");
         loginBtn.setPrefSize(250, 35);
+        loginBtn.setOnAction((ActionEvent ae) -> openStageThree(root, selectedUser));
 
         newUserBtn = new Button("NEW USER");
         newUserBtn.setPrefSize(250, 35);
         newUserBtn.setOnAction((ActionEvent ae) -> openNewStage(root));
-
-        ComboBox comboBox = new ComboBox();
-        List<User> allTheUsers = UserService.selectAll();
-        ObservableList options = FXCollections.observableArrayList(allTheUsers);
-        comboBox.setItems(options);
-        comboBox.setPrefWidth(250);
 
         vb = new VBox(iv1, comboBox, loginBtn, newUserBtn);
         vb.setPadding(new Insets(10, 50, 50, 50));
@@ -76,12 +87,20 @@ public class StageOne extends Application {
         root.getChildren().add(vb);
     }
 
-
-
+    public static void terminate() {
+        System.exit(0);
+    }
 
     public static void openNewStage(Pane parent) {
         StageTwo newStage = new StageTwo(parent);
     }
+
+    public static void openStageThree(Pane parent, User selectedUser) {
+        StageThree newStage = new StageThree(parent, selectedUser);
+
+    }
+
+
 
 
 }

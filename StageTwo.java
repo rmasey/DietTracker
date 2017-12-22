@@ -20,12 +20,12 @@ import static javafx.geometry.Pos.BASELINE_CENTER;
 
 public class StageTwo {
 
-    TextField txtFieldFName;
-    TextField txtFieldLName;
-    TextField txtFieldStartWeight;
-    TextField txtFieldTargetWeight;
-    TextField txtFieldKCalPerDay;
-    ComboBox comboBox;
+   private static TextField txtFieldFName;
+    private static TextField txtFieldLName;
+    private static TextField txtFieldStartWeight;
+    private static TextField txtFieldTargetWeight;
+    private static TextField txtFieldKCalPerDay;
+    private static ComboBox comboBox;
 
     static Pane parent;
 

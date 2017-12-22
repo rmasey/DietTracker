@@ -10,14 +10,14 @@ public class UserService {
     public static List<User> selectAll() {
 
         List<User> targetList = new ArrayList<>();
-        PreparedStatement statement = StageOne.database.newStatement("SELECT FirstName, LastName FROM User ORDER BY LastName");
+        PreparedStatement statement = StageOne.database.newStatement("SELECT UserID, FirstName, LastName FROM User ORDER BY LastName");
 
         try {
             if (statement != null) {
                 ResultSet results = StageOne.database.executeQuery(statement);
                 if (results != null) {
                     while (results.next()) {
-                        targetList.add(new User(results.getString("FirstName"), results.getString("LastName")));
+                        targetList.add(new User(results.getInt("UserID"), results.getString("FirstName"), results.getString("LastName")));
                     }
                 }
             }

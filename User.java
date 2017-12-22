@@ -7,7 +7,8 @@ public class User {
   private int caloriesPerDay;
   private String gender;
 
-    public User(String firstName, String lastName) {
+    public User(int userID, String firstName, String lastName) {
+        this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
     }
@@ -24,7 +25,7 @@ public class User {
 
     @Override
     public String toString() {
-        return firstName + " " + lastName;
+        return userID + " " + firstName + " " + lastName;
     }
 
 

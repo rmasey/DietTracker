@@ -2,7 +2,7 @@ import java.sql.Date;
 
 public class Weighin {
   private int weighinID;
-  private java.sql.Date date;
+  private Date date;
   private int weight;
   private int userID;
 
