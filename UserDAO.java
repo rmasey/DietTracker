@@ -10,11 +10,11 @@ public class UserDAO {
     public static List<User> getAllUsers() {
 
         List<User> targetList = new ArrayList<>();
-        PreparedStatement statement = LoginView.database.newStatement("SELECT UserID, FirstName, LastName, TargetWeight FROM User ORDER BY LastName");
+        PreparedStatement statement = vLogin.database.newStatement("SELECT UserID, FirstName, LastName, TargetWeight FROM User ORDER BY LastName");
 
         try {
             if (statement != null) {
-                ResultSet results = LoginView.database.executeQuery(statement);
+                ResultSet results = vLogin.database.executeQuery(statement);
                 if (results != null) {
                     while (results.next()) {
                         targetList.add(new User(results.getInt("UserID"), results.getString("FirstName"), results.getString("LastName"), results.getInt("TargetWeight")));
@@ -29,12 +29,12 @@ public class UserDAO {
 
     public static void deleteUserById(int id) {
 
-        PreparedStatement statement = LoginView.database.newStatement("DELETE FROM User WHERE userID = ?");
+        PreparedStatement statement = vLogin.database.newStatement("DELETE FROM User WHERE userID = ?");
 
         try {
             if (statement != null) {
                 statement.setInt(1, id);
-                LoginView.database.executeUpdate(statement);
+                vLogin.database.executeUpdate(statement);
             }
         } catch (SQLException resultsException) {
             System.out.println("Database deletion error: " + resultsException.getMessage());
@@ -46,7 +46,7 @@ public class UserDAO {
         PreparedStatement statement;
 
         try{
-            statement = LoginView.database.newStatement("INSERT INTO User (FirstName, LastName, TargetWeight, CaloriesPerDay, Gender) VALUES ( ?, ?, ?, ?, ?)");
+            statement = vLogin.database.newStatement("INSERT INTO User (FirstName, LastName, TargetWeight, CaloriesPerDay, Gender) VALUES ( ?, ?, ?, ?, ?)");
             statement.setString(1, itemToSave.getFirstName());
             statement.setString(2, itemToSave.getLastName());
             statement.setInt(3, itemToSave.getTargetWeight());
@@ -54,7 +54,7 @@ public class UserDAO {
             statement.setString(5, itemToSave.getGender());
 
             if (statement != null) {
-                LoginView.database.executeUpdate(statement);
+                vLogin.database.executeUpdate(statement);
             }
         }
         catch (SQLException resultsexception) {

@@ -11,10 +11,10 @@ public class WeighinDAO {
         List<Weighin> result = new ArrayList<>();
 
         try {
-            PreparedStatement ps = LoginView.database.newStatement("SELECT WeighInID, Date, Weight, UserID FROM WeighIn where userID = ? ORDER by Date DESC");
+            PreparedStatement ps = vLogin.database.newStatement("SELECT WeighInID, Date, Weight, UserID FROM WeighIn where userID = ? ORDER by Date DESC");
             if (ps != null) {
                 ps.setInt(1, userID);
-                ResultSet results = LoginView.database.executeQuery(ps);
+                ResultSet results = vLogin.database.executeQuery(ps);
                 if (results != null) {
                     while (results.next()) {
                         result.add(new Weighin(results.getInt("WeighInID"), results.getDate("Date"), results.getInt("Weight"), results.getInt("UserID")));
@@ -34,9 +34,9 @@ public class WeighinDAO {
         List<Weighin> targetList = new ArrayList<>();
 
         try {
-            PreparedStatement ps = LoginView.database.newStatement("SELECT WeighInID, Date, Weight, UserID FROM WeighIn ORDER BY Date");
+            PreparedStatement ps = vLogin.database.newStatement("SELECT WeighInID, Date, Weight, UserID FROM WeighIn ORDER BY Date");
             if (ps != null) {
-                ResultSet results = LoginView.database.executeQuery(ps);
+                ResultSet results = vLogin.database.executeQuery(ps);
                 if (results != null) {
                     while (results.next()) {
                         targetList.add(new Weighin(results.getInt("WeighInID"), results.getDate("Date"), results.getInt("Weight"), results.getInt("UserID")));
@@ -53,13 +53,13 @@ public class WeighinDAO {
     public static void addWeighin(Weighin weighin) {
 
         try{
-            PreparedStatement ps = LoginView.database.newStatement("INSERT INTO WeighIn (Date, Weight, UserID) VALUES (?, ?, ?)");
+            PreparedStatement ps = vLogin.database.newStatement("INSERT INTO WeighIn (Date, Weight, UserID) VALUES (?, ?, ?)");
             ps.setDate(1, weighin.getDate());
             ps.setInt(2, weighin.getWeight());
             ps.setInt(3, weighin.getUserID());
 
             if (ps != null) {
-                LoginView.database.executeUpdate(ps);
+                vLogin.database.executeUpdate(ps);
             }
         }
         catch (SQLException resultsexception) {

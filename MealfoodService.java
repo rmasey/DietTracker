@@ -10,13 +10,13 @@ public class MealfoodService {
     public static List<Mealfood> selectByID(int mealfoodID) {
 
         List<Mealfood> targetList = new ArrayList<>();
-        PreparedStatement statement = LoginView.database.newStatement("SELECT MealFoodID, FoodID, MealID, ServingQuantity FROM MealFood WHERE mealFoodID = ?");
+        PreparedStatement statement = vLogin.database.newStatement("SELECT MealFoodID, FoodID, MealID, ServingQuantity FROM MealFood WHERE mealFoodID = ?");
 
         try {
             if (statement != null) {
 
                 statement.setInt(1, mealfoodID);
-                ResultSet results = LoginView.database.executeQuery(statement);
+                ResultSet results = vLogin.database.executeQuery(statement);
 
                 if (results != null) {
                     while (results.next()) {
