@@ -2,17 +2,24 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +29,13 @@ public class vMain {
 
     private static Pane parent;
     private static int userID;
+    private static Consumption selectedItem = null;
+    private static TextField txtFieldMealName;
+    private static TextField txtFieldFoodName;
+    private static TextField txtFieldCalories;
+    private static TextField txtFieldDateEaten;
+
+
 
 
     public vMain(Pane theParent, User selectedUser) {
@@ -55,11 +69,6 @@ public class vMain {
         trackWeightBtn.setPrefSize(250, 35);
         trackWeightBtn.setOnAction((ActionEvent ae) -> openStageFour(root, selectedUser));
 
-        Button trackCaloriesBtn = new Button("TRACK CALORIES");
-        trackCaloriesBtn.setPrefSize(250, 35);
-        trackCaloriesBtn.setOnAction((ActionEvent ae) -> openStageFour(root, selectedUser));
-
-
         DatePicker dp = new DatePicker();
         dp.setValue( LocalDate.now() );
 
@@ -67,44 +76,87 @@ public class vMain {
         List<Consumption> alltheFood = ConsumptionDAO.selectAll(selectedUser.getUserID());
         ObservableList options = FXCollections.observableArrayList(alltheFood);
 
-        TableView table = new TableView<>();
-
-        table.setItems(options);
 
 
-        TableColumn userID = new TableColumn<>("userID");
-        userID.setCellValueFactory(new PropertyValueFactory<>("userID"));
-        table.getColumns().add(userID);
 
-        TableColumn mealName = new TableColumn<>("mealName");
-        mealName.setCellValueFactory(new PropertyValueFactory<>("mealName"));
-        table.getColumns().add(mealName);
+        TableView<Consumption> tvTable = new TableView<Consumption>();
+        tvTable.setEditable(true);
+        tvTable.setItems(options);
+        tvTable.setOnMouseClicked((MouseEvent me) -> {
+            selectedItem = tvTable.getSelectionModel().getSelectedItem();
+        });
+
+
+
+        TableColumn <Consumption, String> mealNameCol = new TableColumn<>("Meal");
+        mealNameCol.setCellValueFactory(new PropertyValueFactory<Consumption, String>("MealName"));
+        mealNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        // for this to be called user must hit return after changing the data!
+       mealNameCol.setOnEditCommit((e) -> mealNameCol_OnEditCommit(e, selectedUser));
+
+
+
+        tvTable.getColumns().add(mealNameCol);
+
+
 
         TableColumn foodName = new TableColumn<>("foodName");
         foodName.setCellValueFactory(new PropertyValueFactory<>("foodName"));
-        table.getColumns().add(foodName);
+        tvTable.getColumns().add(foodName);
 
         TableColumn calories = new TableColumn<>("calories");
         calories.setCellValueFactory(new PropertyValueFactory<>("calories"));
-        table.getColumns().add(calories);
+        tvTable.getColumns().add(calories);
 
         TableColumn dateEaten = new TableColumn<>("dateEaten");
         dateEaten.setCellValueFactory(new PropertyValueFactory<>("dateEaten"));
-        table.getColumns().add(dateEaten);
+        tvTable.getColumns().add(dateEaten);
 
-        table.setLayoutX(50);
-        table.setLayoutY(350);
+        txtFieldMealName = new TextField();
+        txtFieldMealName.setLayoutX(200);
+        txtFieldMealName.setLayoutY(600);
+        txtFieldMealName.setPrefWidth(300);
+        txtFieldMealName.setPromptText("Enter meal eg lunch, snack");
+
+        txtFieldFoodName = new TextField();
+        txtFieldFoodName.setLayoutX(550);
+        txtFieldFoodName.setLayoutY(600);
+        txtFieldFoodName.setPromptText("Enter food");
+
+        txtFieldCalories = new TextField();
+        txtFieldCalories.setLayoutX(550);
+        txtFieldCalories.setLayoutY(600);
+        txtFieldCalories.setPromptText("Enter calories");
+
+        txtFieldDateEaten = new TextField();
+        txtFieldDateEaten.setLayoutX(550);
+        txtFieldDateEaten.setLayoutY(600);
+        txtFieldDateEaten.setPromptText("Enter date");
 
 
+        Button btnAdd = new Button("Add");
+        btnAdd.setLayoutX(50);
+        btnAdd.setLayoutY(600);
+        btnAdd.setOnAction((ActionEvent ae) -> addItem(selectedUser));
+
+        Button btnDelete = new Button("Delete Selected");
+        btnDelete.setLayoutX(50);
+        btnDelete.setLayoutY(500);
+        btnDelete.setOnAction((ActionEvent ae) -> deleteItem());
+
+        VBox vb1 = new VBox(txtFieldMealName, txtFieldFoodName, txtFieldCalories, txtFieldDateEaten, btnAdd, btnDelete);
+
+        HBox hb = new HBox(tvTable, vb1);
 
 
-        VBox vb = new VBox(iv1, label, trackWeightBtn, trackCaloriesBtn, dp);
+        VBox vb = new VBox(iv1, label, trackWeightBtn, dp, hb);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
         root.getChildren().add(vb);
-        root.getChildren().add(table);
+
     }
 
     public static void terminate()
@@ -112,9 +164,69 @@ public class vMain {
         System.exit(0);
     }
 
-    public static void openStageFour(Pane parent, User selectedUser) {
+    public static void openStageFour(Pane parent, User selectedUser)
+    {
         vTrackWeight newStage = new vTrackWeight(parent, selectedUser);
+    }
+
+    public static void mealNameCol_OnEditCommit(Event e, User selectedUser)
+    {
+        System.out.println("Updating database...");
+
+        TableColumn.CellEditEvent<Consumption, String>ce;
+        ce = (TableColumn.CellEditEvent<Consumption, String>) e;
+
+        try
+        {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set MealName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
+            statement.setString(1,ce.getNewValue());
+
+            if (statement != null) {
+                vLogin.database.executeUpdate(statement);
+            }
+
+        }
+        catch (SQLException resultsexception) {
+            System.out.println("Database result processing error: " + resultsexception.getMessage());
+        }
 
     }
+
+
+    public void addItem(User selectedUser) {
+        //get the UserID
+        int userID = selectedUser.getUserID();
+        //get the mealName
+        String mealName = txtFieldMealName.getText();
+        //get the FoodName
+        String foodName = txtFieldFoodName.getText();
+        //get the calories
+        int calories = Integer.parseInt(txtFieldCalories.getText());
+        //get the date
+        //java.sql.Date dateEaten = txtFieldDateEaten.getText();
+        java.sql.Date dateEaten = java.sql.Date.valueOf(LocalDate.now());
+
+
+        //call save method from ConsumptionDAO using data above
+        //since the ConsumptionID is autoincremented in the DB, it can be set to 1
+        ConsumptionDAO.save(new Consumption(1, userID, mealName, foodName, calories, dateEaten));
+
+        //re-load data into table view with new item showing
+
+    }
+
+    public void deleteItem() {
+        // if there is not a selected weight return
+        if (selectedItem == null) {
+            return;
+        }
+
+        // call the method to delete the selected weight
+        ConsumptionDAO.deleteById(selectedItem.getConsumptionID());
+
+        //re-load all the weight data
+
+    }
+
 
 }

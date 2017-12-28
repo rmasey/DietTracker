@@ -10,14 +10,14 @@ public class ConsumptionDAO {
     public static List<Consumption> selectAll(int userID) {
 
         List<Consumption> targetList = new ArrayList<>();
-        PreparedStatement statement = vLogin.database.newStatement("SELECT userID, mealName, foodName, calories, dateEaten FROM Consumption where userID = " + userID);
+        PreparedStatement statement = vLogin.database.newStatement("SELECT ConsumptionID, UserID, MealName, FoodName, Calories, DateEaten FROM Consumption where userID = " + userID);
 
         try {
             if (statement != null) {
                 ResultSet results = vLogin.database.executeQuery(statement);
                 if (results != null) {
                     while (results.next()) {
-                        targetList.add(new Consumption(results.getInt("userID"), results.getString("mealName"), results.getString("foodName"), results.getInt("calories"), results.getDate("dateEaten")));
+                        targetList.add(new Consumption(results.getInt("ConsumptionID"), results.getInt("userID"),results.getString("mealName"), results.getString("foodName"), results.getInt("calories"), results.getDate("dateEaten")));
                     }
                 }
             }
@@ -45,6 +45,20 @@ public class ConsumptionDAO {
         }
         catch (SQLException resultsexception) {
             System.out.println("Database result processing error: " + resultsexception.getMessage());
+        }
+    }
+
+    public static void deleteById(int id) {
+
+        PreparedStatement statement = vLogin.database.newStatement("DELETE FROM Consumption WHERE ConsumptionID = ?");
+
+        try {
+            if (statement != null) {
+                statement.setInt(1, id);
+                vLogin.database.executeUpdate(statement);
+            }
+        } catch (SQLException resultsException) {
+            System.out.println("Database deletion error: " + resultsException.getMessage());
         }
     }
 

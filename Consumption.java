@@ -2,13 +2,15 @@ import java.util.Date;
 
 public class Consumption
 {
-  private int userID;
+  private int consumptionID;
+    private int userID;
   private String mealName;
   private String foodName;
   private int calories;
     private Date dateEaten;
 
-    public Consumption(int userID, String mealName, String foodName, int calories, Date dateEaten) {
+    public Consumption(int consumptionID, int userID, String mealName, String foodName, int calories, Date dateEaten) {
+        this.consumptionID = consumptionID;
         this.userID = userID;
         this.mealName = mealName;
         this.foodName = foodName;
@@ -19,12 +21,21 @@ public class Consumption
     @Override
     public String toString() {
         return "Consumption{" +
-                "userID=" + userID +
+                "consumptionID=" + consumptionID +
+                ", userID=" + userID +
                 ", mealName='" + mealName + '\'' +
                 ", foodName='" + foodName + '\'' +
                 ", calories=" + calories +
                 ", dateEaten=" + dateEaten +
                 '}';
+    }
+
+    public int getConsumptionID() {
+        return consumptionID;
+    }
+
+    public void setConsumptionID(int consumptionID) {
+        this.consumptionID = consumptionID;
     }
 
     public int getUserID() {
@@ -63,7 +74,7 @@ public class Consumption
         return dateEaten;
     }
 
-    public void setDateEaten(Date date) {
+    public void setDateEaten(Date dateEaten) {
         this.dateEaten = dateEaten;
     }
 }

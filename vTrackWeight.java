@@ -120,12 +120,12 @@ public class vTrackWeight {
 
         loadData(selectedUser, tblView);
 
-        vb = new VBox(iv1, label1, label2, dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn, tblView, lineChart);
+        vb = new VBox(iv1, label1, label2, dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
-        root.getChildren().addAll(vb);
+        root.getChildren().addAll(vb, tblView, lineChart);
     }
 
 
