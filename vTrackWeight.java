@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -13,16 +14,20 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 
-import java.sql.Date;
+//import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.sql.Date;
 import java.util.List;
 
 import static javafx.geometry.Pos.BASELINE_CENTER;
@@ -38,10 +43,18 @@ public class vTrackWeight {
     private static ObservableList<Weight> weightData = FXCollections.observableArrayList();
     private static int startWeight;
     private static int latestWeight;
+    private static VBox vb;
+    private static ImageView iv1;
+    private static Button createWeightBtn;
+    private static Pane root;
+    private static Label label1;
+    private static Label label2;
+    private static Weight currentlySelectedWeight = null;
+    private static Button deleteWeightBtn;
+    private static XYChart.Series series;
 
 
     public vTrackWeight(Pane theParent, User selectedUser) {
-
         Stage stage = new Stage();
         parent = theParent;
         parent.setDisable(true);
@@ -50,7 +63,7 @@ public class vTrackWeight {
 
     public void start(Stage stage, User selectedUser) {
 
-        Pane root = new Pane();
+        root = new Pane();
         Scene scene = new Scene(root, 450, 600);
         scene.getStylesheets().add("style.css");
         stage.setTitle("Track Weight");
@@ -59,107 +72,74 @@ public class vTrackWeight {
         stage.show();
 
         Image image = new Image("/Images/logo.png");
-        ImageView iv1 = new ImageView();
+        iv1 = new ImageView();
         iv1.setImage(image);
         iv1.setFitHeight(100);
         iv1.setPreserveRatio(true);
 
-        Label label1 = new Label("Current Weight " +  "kg         Target Weight " );
-        Label label2 = new Label("Weight change "  + "kg         Remaining " );
-
-
-
+        series = new XYChart.Series();
 
         //defining the axes
-        final NumberAxis xAxis = new NumberAxis();
+        final CategoryAxis xAxis = new CategoryAxis();
         final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Number of Month");
+        // dateAxis.setLabel("Date");
+
         //creating the chart
-        final LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-        XYChart.Series series = new XYChart.Series();
-        //populating the series with data
-
-        int i = 1;
-//        for (Weighin w : allItems){
-//            series.getData().add(new XYChart.Data(i ,  w.getWeight()));
-//            i++;
-//        }
-
-        series.getData().add(new XYChart.Data(1, 23));
-        series.getData().add(new XYChart.Data(2, 14));
-        series.getData().add(new XYChart.Data(3, 15));
-        series.getData().add(new XYChart.Data(4, 24));
-        series.getData().add(new XYChart.Data(5, 34));
-        series.getData().add(new XYChart.Data(6, 36));
-        series.getData().add(new XYChart.Data(7, 22));
-        series.getData().add(new XYChart.Data(8, 45));
-        series.getData().add(new XYChart.Data(9, 43));
-        series.getData().add(new XYChart.Data(10, 17));
-        series.getData().add(new XYChart.Data(11, 29));
-        series.getData().add(new XYChart.Data(12, 25));
-
+        final LineChart<String, Number> lineChart = new LineChart<String, Number>(xAxis, yAxis);
         lineChart.getData().add(series);
         lineChart.setMaxHeight(300);
-        lineChart.setLayoutX(100);
-        lineChart.setLayoutY(200);
-        root.getChildren().add(lineChart);
-
 
         dp = new DatePicker(LocalDate.now());
-
-
-
-
 
         txtFieldCurrentWeight = new TextField();
         txtFieldCurrentWeight.setPromptText("Current weight in KG");
 
-        Button createWeightBtn = new Button();
+        createWeightBtn = new Button();
         createWeightBtn.setText("TRACK WEIGHT");
-        createWeightBtn.setOnAction((ActionEvent ae) -> addWeighin(selectedUser, tblView));
+        createWeightBtn.setOnAction((ActionEvent ae) -> addItem(selectedUser, tblView));
+        deleteWeightBtn = new Button();
+        deleteWeightBtn.setText("DELETE WEIGHT");
+        deleteWeightBtn.setOnAction((ActionEvent ae) -> deleteSelectedItem(selectedUser, tblView));
 
 
-        TableView<Weight> tblView = new TableView<Weight>();
+        //create editable table
+        tblView = new TableView<Weight>();
         tblView.setEditable(true);
-
+        tblView.setOnMouseClicked((MouseEvent me) -> {
+            currentlySelectedWeight = tblView.getSelectionModel().getSelectedItem();
+        });
 
         TableColumn<Weight, Date> firstColumn = new TableColumn<>("Date");
         firstColumn.setCellValueFactory(new PropertyValueFactory<Weight, Date>("Date"));
 
-        TableColumn<Weight, Integer> secondColumn = new TableColumn<>("currentWeight");
-           secondColumn.setCellValueFactory(new PropertyValueFactory<Weight, Integer>("currentWeight"));
+        TableColumn<Weight, Integer> secondColumn = new TableColumn<>("Weight");
+        secondColumn.setCellValueFactory(new PropertyValueFactory<Weight, Integer>("currentWeight"));
 
 
         tblView.getColumns().addAll(firstColumn, secondColumn);
 
-        tblView.setLayoutX(50);
-        tblView.setLayoutY(350);
+        loadData(selectedUser, tblView);
 
-        VBox vb = new VBox(iv1, label1, label2, dp, txtFieldCurrentWeight, createWeightBtn);
+        vb = new VBox(iv1, label1, label2, dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn, tblView, lineChart);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
-
-        root.getChildren().addAll(vb, tblView);
-
-
-        loadData(selectedUser, tblView);
-
+        root.getChildren().addAll(vb);
     }
 
-    public void addWeighin(User selectedUser, TableView tblView) {
 
-
-
+    public void addItem(User selectedUser, TableView tblView) {
+        //get the date
         java.sql.Date datePicked = java.sql.Date.valueOf(dp.getValue());
-
-
+        //get the weight
         int currentWeight = Integer.parseInt(txtFieldCurrentWeight.getText());
+        //get the UserID
         int userID = selectedUser.getUserID();
-
+        //call save method from WeightDAO using data above
+        //since the weightID is autoincremented in the DB, weightID can be set to 1
         WeightDAO.save(new Weight(1, datePicked, currentWeight, userID));
-
+        //re-load data into table view with new item showing
         loadData(selectedUser, tblView);
     }
 
@@ -169,26 +149,47 @@ public class vTrackWeight {
         WeightDAO.readAll(weightData, selectedUser.getUserID());
 
         tblView.setItems(weightData);
-        tblView.refresh();
 
-        int lastItem = weightData.size() - 1;
-        int startWeight = weightData.get(lastItem).getCurrentweight();
-        int latestWeight = weightData.get(0).getCurrentweight();
-        System.out.println(weightData.get(0).getUserid());
-        int selectedUserID = weightData.get(0).getUserid();
-
-        Label label1 = new Label("Current Weight " + latestWeight + "kg         Target Weight " + selectedUserID);
-        Label label2 = new Label("Weight change " + (startWeight - latestWeight) + "kg         Remaining " + (latestWeight - selectedUserID));
+        int selectedUserID = selectedUser.getUserID();
 
 
+        if (weightData.size() != 0) {
+            int lastItem = weightData.size() - 1;
+            int startWeight = weightData.get(lastItem).getCurrentWeight();
+            int latestWeight = weightData.get(0).getCurrentWeight();
+            label1 = new Label("Current Weight " + latestWeight + "kg         Target Weight " + selectedUserID);
+            label2 = new Label("Weight change " + (startWeight - latestWeight) + "kg         Remaining " + (latestWeight - selectedUserID));
+        } else {
+            label1 = new Label("Current Weight " + "kg         Target Weight " + selectedUserID);
+            label2 = new Label("Weight change " + "kg         Remaining ");
+        }
 
+        // series = null; need to clear this not keep adding to it as when weight deleted still in series
+        for (Weight w : weightData) {
+            series.getData().add(new XYChart.Data(w.getDate().toString(), w.getCurrentWeight()));
+        }
+
+    }
+
+    private static void deleteSelectedItem(User selectedUser, TableView tblView) {
+        // if there is not a selected weight return
+        if (currentlySelectedWeight == null) {
+            return;
+        }
+
+        // call the method to delete the selected weight
+        WeightDAO.deleteById(currentlySelectedWeight.getWeightID());
+
+        //re-load all the weight data
+        loadData(selectedUser, tblView);
     }
 
 
     public void closeStage(Stage stage) {
+
+        //enable parent again and close this stage
         parent.setDisable(false);
         stage.close();
-
     }
 
 

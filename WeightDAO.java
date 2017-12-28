@@ -9,7 +9,7 @@ public class WeightDAO
 
     public static void readAll(List<Weight> list, int userID)
     {
-        PreparedStatement statement = vLogin.database.newStatement("SELECT WeightID, Date, currentWeight, userID FROM Weight WHERE UserID = " + userID + " ORDER BY date DESC");
+        PreparedStatement statement = vLogin.database.newStatement("SELECT WeightID, Date, CurrentWeight, UserID FROM Weight WHERE UserID = " + userID + " ORDER BY Date DESC");
 
         if (statement != null)      // Assuming the statement correctly initated...
         {
@@ -19,7 +19,7 @@ public class WeightDAO
             {
                 try {                               // ...add each one to the list.
                     while (results.next()) {
-                        list.add(new Weight (results.getInt("WeightID"), results.getDate("Date"), results.getInt("currentWeight"), results.getInt("UserID")));
+                        list.add(new Weight (results.getInt("WeightID"), results.getDate("Date"), results.getInt("CurrentWeight"), results.getInt("UserID")));
                     }
                 }
                 catch (SQLException resultsexception)       // Catch any error processing the results.
@@ -78,8 +78,8 @@ public class WeightDAO
         {
             PreparedStatement statement = vLogin.database.newStatement("INSERT INTO Weight (Date, currentWeight, userID) VALUES (?, ?, ?)");
             statement.setDate(1, weight.getDate());
-            statement.setInt(2, weight.getCurrentweight());
-            statement.setInt(3, weight.getUserid());
+            statement.setInt(2, weight.getCurrentWeight());
+            statement.setInt(3, weight.getUserID());
 
             if (statement != null) {
                 vLogin.database.executeUpdate(statement);
@@ -90,4 +90,22 @@ public class WeightDAO
             System.out.println("Database result processing error: " + resultsexception.getMessage());
         }
     }
+
+    public static void deleteById(int id) {
+
+        PreparedStatement statement = vLogin.database.newStatement("DELETE FROM Weight WHERE WeightID = ?");
+
+        try {
+            if (statement != null) {
+                statement.setInt(1, id);
+                vLogin.database.executeUpdate(statement);
+            }
+        } catch (SQLException resultsException) {
+            System.out.println("Database deletion error: " + resultsException.getMessage());
+        }
+    }
+
+
+
+
 }

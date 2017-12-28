@@ -1,34 +1,34 @@
 import java.sql.Date;
 
 public class Weight {
-    private int weightid;
+    private int weightID;
     private Date date;
-    private int currentweight;
-    private int userid;
+    private int currentWeight;
+    private int userID;
 
-    public Weight(int weightid, Date date, int currentweight, int userid) {
-        this.weightid = weightid;
+    public Weight(int weightID, Date date, int currentWeight, int userID) {
+        this.weightID = weightID;
         this.date = date;
-        this.currentweight = currentweight;
-        this.userid = userid;
+        this.currentWeight = currentWeight;
+        this.userID = userID;
     }
 
     @Override
     public String toString() {
         return "Weight{" +
-                "weightid=" + weightid +
+                "weightID=" + weightID +
                 ", date=" + date +
-                ", currentweight=" + currentweight +
-                ", userid=" + userid +
+                ", currentWeight=" + currentWeight +
+                ", userID=" + userID +
                 '}';
     }
 
-    public int getWeightid() {
-        return weightid;
+    public int getWeightID() {
+        return weightID;
     }
 
-    public void setWeightid(int weightid) {
-        this.weightid = weightid;
+    public void setWeightID(int weightID) {
+        this.weightID = weightID;
     }
 
     public Date getDate() {
@@ -39,19 +39,19 @@ public class Weight {
         this.date = date;
     }
 
-    public int getCurrentweight() {
-        return currentweight;
+    public int getCurrentWeight() {
+        return currentWeight;
     }
 
-    public void setCurrentweight(int currentweight) {
-        this.currentweight = currentweight;
+    public void setCurrentWeight(int currentWeight) {
+        this.currentWeight = currentWeight;
     }
 
-    public int getUserid() {
-        return userid;
+    public int getUserID() {
+        return userID;
     }
 
-    public void setUserid(int userid) {
-        this.userid = userid;
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 }
