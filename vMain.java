@@ -50,7 +50,7 @@ public class vMain {
     public void start(Stage stage, User selectedUser) {
 
         Pane root = new Pane();
-        Scene scene = new Scene(root, 450, 600);
+        Scene scene = new Scene(root, 900, 600);
         scene.getStylesheets().add("style.css");
         stage.setTitle("Main");
         stage.setScene(scene);
@@ -73,43 +73,41 @@ public class vMain {
         dp.setValue( LocalDate.now() );
 
 
-        List<Consumption> alltheFood = ConsumptionDAO.selectAll(selectedUser.getUserID());
-        ObservableList options = FXCollections.observableArrayList(alltheFood);
-
-
 
 
         TableView<Consumption> tvTable = new TableView<Consumption>();
         tvTable.setEditable(true);
-        tvTable.setItems(options);
+        tvTable.setMaxHeight(200);
         tvTable.setOnMouseClicked((MouseEvent me) -> {
             selectedItem = tvTable.getSelectionModel().getSelectedItem();
         });
 
-
+        //get all data for the table
+        loadItemsinTable(selectedUser, tvTable);
 
         TableColumn <Consumption, String> mealNameCol = new TableColumn<>("Meal");
         mealNameCol.setCellValueFactory(new PropertyValueFactory<Consumption, String>("MealName"));
         mealNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-
         // for this to be called user must hit return after changing the data!
-       mealNameCol.setOnEditCommit((e) -> mealNameCol_OnEditCommit(e, selectedUser));
-
-
-
+       mealNameCol.setOnEditCommit((e) -> mealNameCol_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(mealNameCol);
 
 
+        TableColumn foodNameCol = new TableColumn<>("Food Name");
+        foodNameCol.setCellValueFactory(new PropertyValueFactory<>("foodName"));
+        foodNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        // for this to be called user must hit return after changing the data!
+        foodNameCol.setOnEditCommit((e) -> foodNameCol_OnEditCommit(e, selectedUser, tvTable));
+        tvTable.getColumns().add(foodNameCol);
 
-        TableColumn foodName = new TableColumn<>("foodName");
-        foodName.setCellValueFactory(new PropertyValueFactory<>("foodName"));
-        tvTable.getColumns().add(foodName);
+        TableColumn caloriesCol = new TableColumn<>("Calories");
+        caloriesCol.setCellValueFactory(new PropertyValueFactory<>("Calories"));
+        //caloriesCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        // for this to be called user must hit return after changing the data!
+        caloriesCol.setOnEditCommit((e) -> caloriesCol_OnEditCommit(e, selectedUser, tvTable));
+        tvTable.getColumns().add(caloriesCol);
 
-        TableColumn calories = new TableColumn<>("calories");
-        calories.setCellValueFactory(new PropertyValueFactory<>("calories"));
-        tvTable.getColumns().add(calories);
-
-        TableColumn dateEaten = new TableColumn<>("dateEaten");
+        TableColumn dateEaten = new TableColumn<>("Date Eaten");
         dateEaten.setCellValueFactory(new PropertyValueFactory<>("dateEaten"));
         tvTable.getColumns().add(dateEaten);
 
@@ -138,16 +136,18 @@ public class vMain {
         Button btnAdd = new Button("Add");
         btnAdd.setLayoutX(50);
         btnAdd.setLayoutY(600);
-        btnAdd.setOnAction((ActionEvent ae) -> addItem(selectedUser));
+        btnAdd.setOnAction((ActionEvent ae) -> addItem(selectedUser, tvTable));
 
         Button btnDelete = new Button("Delete Selected");
         btnDelete.setLayoutX(50);
         btnDelete.setLayoutY(500);
-        btnDelete.setOnAction((ActionEvent ae) -> deleteItem());
+        btnDelete.setOnAction((ActionEvent ae) -> deleteItem(selectedUser, tvTable));
 
         VBox vb1 = new VBox(txtFieldMealName, txtFieldFoodName, txtFieldCalories, txtFieldDateEaten, btnAdd, btnDelete);
+        vb1.setPadding(new Insets(10, 50, 50, 50));
 
         HBox hb = new HBox(tvTable, vb1);
+        hb.setPadding(new Insets(10, 50, 50, 50));
 
 
         VBox vb = new VBox(iv1, label, trackWeightBtn, dp, hb);
@@ -159,17 +159,17 @@ public class vMain {
 
     }
 
-    public static void terminate()
+    public void terminate()
     {
         System.exit(0);
     }
 
-    public static void openStageFour(Pane parent, User selectedUser)
+    public void openStageFour(Pane parent, User selectedUser)
     {
         vTrackWeight newStage = new vTrackWeight(parent, selectedUser);
     }
 
-    public static void mealNameCol_OnEditCommit(Event e, User selectedUser)
+    public void mealNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
     {
         System.out.println("Updating database...");
 
@@ -190,10 +190,63 @@ public class vMain {
             System.out.println("Database result processing error: " + resultsexception.getMessage());
         }
 
+        loadItemsinTable(selectedUser, tvTable);
+
+
+    }
+
+    public void foodNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
+    {
+        System.out.println("Updating database...");
+
+        TableColumn.CellEditEvent<Consumption, String>ce;
+        ce = (TableColumn.CellEditEvent<Consumption, String>) e;
+
+        try
+        {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set FoodName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
+            statement.setString(1,ce.getNewValue());
+
+            if (statement != null) {
+                vLogin.database.executeUpdate(statement);
+            }
+
+        }
+        catch (SQLException resultsexception) {
+            System.out.println("Database result processing error: " + resultsexception.getMessage());
+        }
+
+        loadItemsinTable(selectedUser, tvTable);
+
+    }
+
+    public void caloriesCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
+    {
+        System.out.println("Updating database...");
+
+        TableColumn.CellEditEvent<Consumption, String>ce;
+        ce = (TableColumn.CellEditEvent<Consumption, String>) e;
+
+        try
+        {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set Calories = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
+            statement.setString(1,ce.getNewValue());
+
+            if (statement != null) {
+                vLogin.database.executeUpdate(statement);
+            }
+
+        }
+        catch (SQLException resultsexception) {
+            System.out.println("Database result processing error: " + resultsexception.getMessage());
+        }
+
+        loadItemsinTable(selectedUser, tvTable);
+
     }
 
 
-    public void addItem(User selectedUser) {
+    public void addItem(User selectedUser, TableView tvTable) {
         //get the UserID
         int userID = selectedUser.getUserID();
         //get the mealName
@@ -206,16 +259,18 @@ public class vMain {
         //java.sql.Date dateEaten = txtFieldDateEaten.getText();
         java.sql.Date dateEaten = java.sql.Date.valueOf(LocalDate.now());
 
+        //something wrong with the
+
 
         //call save method from ConsumptionDAO using data above
         //since the ConsumptionID is autoincremented in the DB, it can be set to 1
         ConsumptionDAO.save(new Consumption(1, userID, mealName, foodName, calories, dateEaten));
 
-        //re-load data into table view with new item showing
+        loadItemsinTable(selectedUser, tvTable);
 
     }
 
-    public void deleteItem() {
+    public void deleteItem(User selectedUser, TableView tvTable) {
         // if there is not a selected weight return
         if (selectedItem == null) {
             return;
@@ -224,9 +279,16 @@ public class vMain {
         // call the method to delete the selected weight
         ConsumptionDAO.deleteById(selectedItem.getConsumptionID());
 
-        //re-load all the weight data
-
+        //re-load all the food data
+        loadItemsinTable(selectedUser, tvTable);
     }
 
+
+    public void loadItemsinTable(User selectedUser, TableView tvTable) {
+
+        List<Consumption> alltheFood = ConsumptionDAO.selectAll(selectedUser.getUserID());
+        ObservableList options = FXCollections.observableArrayList(alltheFood);
+        tvTable.setItems(options);
+    }
 
 }

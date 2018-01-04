@@ -3,6 +3,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -21,15 +22,22 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import sun.util.calendar.LocalGregorianCalendar;
+
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 //import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 import java.time.LocalDate;
-import java.sql.Date;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
+import static java.time.LocalDate.*;
 import static javafx.geometry.Pos.BASELINE_CENTER;
 import static javafx.scene.control.cell.TextFieldTableCell.forTableColumn;
 
@@ -64,7 +72,7 @@ public class vTrackWeight {
     public void start(Stage stage, User selectedUser) {
 
         root = new Pane();
-        Scene scene = new Scene(root, 450, 600);
+        Scene scene = new Scene(root, 900, 600);
         scene.getStylesheets().add("style.css");
         stage.setTitle("Track Weight");
         stage.setScene(scene);
@@ -77,15 +85,16 @@ public class vTrackWeight {
         iv1.setFitHeight(100);
         iv1.setPreserveRatio(true);
 
+
         series = new XYChart.Series();
 
         //defining the axes
-        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
+        NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
         // dateAxis.setLabel("Date");
 
         //creating the chart
-        final LineChart<String, Number> lineChart = new LineChart<String, Number>(xAxis, yAxis);
+        LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
         lineChart.getData().add(series);
         lineChart.setMaxHeight(300);
 
@@ -104,6 +113,7 @@ public class vTrackWeight {
 
         //create editable table
         tblView = new TableView<Weight>();
+        tblView.setMaxHeight(200);
         tblView.setEditable(true);
         tblView.setOnMouseClicked((MouseEvent me) -> {
             currentlySelectedWeight = tblView.getSelectionModel().getSelectedItem();
@@ -120,12 +130,25 @@ public class vTrackWeight {
 
         loadData(selectedUser, tblView);
 
-        vb = new VBox(iv1, label1, label2, dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn);
+        vb = new VBox(dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
-        root.getChildren().addAll(vb, tblView, lineChart);
+
+
+        HBox hb = new HBox(tblView, vb);
+        hb.setPadding(new Insets(10, 50, 50, 50));
+
+
+        VBox vb = new VBox(iv1, hb);
+        vb.setPadding(new Insets(10, 50, 50, 50));
+        vb.setSpacing(10);
+        vb.setAlignment(BASELINE_CENTER);
+
+
+        root.getChildren().addAll(vb);
+        //everything goes wrong when you add the linechart in!!!
     }
 
 
@@ -140,23 +163,23 @@ public class vTrackWeight {
         //since the weightID is autoincremented in the DB, weightID can be set to 1
         WeightDAO.save(new Weight(1, datePicked, currentWeight, userID));
         //re-load data into table view with new item showing
+
         loadData(selectedUser, tblView);
     }
 
-    public static void loadData(User selectedUser, TableView tblView) {
+    public void loadData(User selectedUser, TableView tblView) {
 
-        weightData.clear();
-        WeightDAO.readAll(weightData, selectedUser.getUserID());
 
-        tblView.setItems(weightData);
+        List<Weight> alltheWeight = WeightDAO.selectAll(selectedUser.getUserID());
+        ObservableList options = FXCollections.observableArrayList(alltheWeight);
+        tblView.setItems(options);
 
         int selectedUserID = selectedUser.getUserID();
 
-
-        if (weightData.size() != 0) {
-            int lastItem = weightData.size() - 1;
-            int startWeight = weightData.get(lastItem).getCurrentWeight();
-            int latestWeight = weightData.get(0).getCurrentWeight();
+        if (alltheWeight.size() != 0) {
+            int lastItem = alltheWeight.size() - 1;
+            int startWeight = alltheWeight.get(lastItem).getCurrentWeight();
+            int latestWeight = alltheWeight.get(0).getCurrentWeight();
             label1 = new Label("Current Weight " + latestWeight + "kg         Target Weight " + selectedUserID);
             label2 = new Label("Weight change " + (startWeight - latestWeight) + "kg         Remaining " + (latestWeight - selectedUserID));
         } else {
@@ -165,13 +188,13 @@ public class vTrackWeight {
         }
 
         // series = null; need to clear this not keep adding to it as when weight deleted still in series
-        for (Weight w : weightData) {
+        for (Weight w : alltheWeight) {
             series.getData().add(new XYChart.Data(w.getDate().toString(), w.getCurrentWeight()));
         }
 
     }
 
-    private static void deleteSelectedItem(User selectedUser, TableView tblView) {
+    private void deleteSelectedItem(User selectedUser, TableView tblView) {
         // if there is not a selected weight return
         if (currentlySelectedWeight == null) {
             return;
@@ -191,6 +214,33 @@ public class vTrackWeight {
         parent.setDisable(false);
         stage.close();
     }
+
+//    private LineChart<Date, Number> createHourChart() {
+//        NumberAxis numberAxis = new NumberAxis();
+//        DateAxis dateAxis = new DateAxis();
+//        LineChart<Date, Number> lineChart = new LineChart<DateAxis, Number>(dateAxis, numberAxis);
+//
+//        ObservableList<XYChart.Series<Date, Number>> series = FXCollections.observableArrayList();
+//
+//        final XYChart.Series<Date, Number> series1 = new XYChart.Series<>();
+//        ObservableList<XYChart.Data<Date, Number>> series1Data = FXCollections.observableArrayList();
+//        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 1, 9, 3, 1).getTime(), 2));
+//        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 1, 22, 4, 2).getTime(), 4));
+//        series1.setName("Series 1");
+//        series1.setData(series1Data);
+//
+//        series.add(series1);
+//        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//
+//            @Override
+//            public void handle(MouseEvent t) {
+//                series1.getData().add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 2, 10, 0, 0).getTime(), 80d));
+//
+//            }
+//        });
+//        lineChart.setData(series);
+//        return lineChart;
+//    }
 
 
 }

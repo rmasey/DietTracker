@@ -1,6 +1,7 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class ConsumptionDAO {
     public static List<Consumption> selectAll(int userID) {
 
         List<Consumption> targetList = new ArrayList<>();
-        PreparedStatement statement = vLogin.database.newStatement("SELECT ConsumptionID, UserID, MealName, FoodName, Calories, DateEaten FROM Consumption where userID = " + userID);
+        PreparedStatement statement = vLogin.database.newStatement("SELECT ConsumptionID, UserID, MealName, FoodName, Calories, DateEaten FROM Consumption where userID = " + userID );
 
         try {
             if (statement != null) {

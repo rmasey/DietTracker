@@ -1,35 +1,35 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WeightDAO
 {
 
+    public static List<Weight> selectAll(int userID) {
 
-    public static void readAll(List<Weight> list, int userID)
-    {
-        PreparedStatement statement = vLogin.database.newStatement("SELECT WeightID, Date, CurrentWeight, UserID FROM Weight WHERE UserID = " + userID + " ORDER BY Date DESC");
+        List<Weight> targetList = new ArrayList<>();
+        PreparedStatement statement = vLogin.database.newStatement("SELECT WeightID, Date,  CurrentWeight, UserID FROM Weight WHERE UserID = " + userID + " ORDER BY Date DESC" );
 
-        if (statement != null)      // Assuming the statement correctly initated...
-        {
-            ResultSet results =  vLogin.database.executeQuery(statement);      // ...run the query!
-
-            if (results != null)        // If some results are returned from the query...
-            {
-                try {                               // ...add each one to the list.
+        try {
+            if (statement != null) {
+                ResultSet results = vLogin.database.executeQuery(statement);
+                if (results != null) {
                     while (results.next()) {
-                        list.add(new Weight (results.getInt("WeightID"), results.getDate("Date"), results.getInt("CurrentWeight"), results.getInt("UserID")));
+                        targetList.add(new Weight(results.getInt("WeightID"), results.getDate("Date"),results.getInt("CurrentWeight"), results.getInt("UserID")));
                     }
                 }
-                catch (SQLException resultsexception)       // Catch any error processing the results.
-                {
-                    System.out.println("Database result processing error: " + resultsexception.getMessage());
-                }
             }
+        } catch (SQLException resultsException) {
+            System.out.println("Database select all error: " + resultsException.getMessage());
         }
-
+        return targetList;
     }
+
+
+
+
 
 //    public static Weight getById(int BookID)
 //    {
