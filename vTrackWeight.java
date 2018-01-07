@@ -41,6 +41,28 @@ import static java.time.LocalDate.*;
 import static javafx.geometry.Pos.BASELINE_CENTER;
 import static javafx.scene.control.cell.TextFieldTableCell.forTableColumn;
 
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.stage.Stage;
+
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 
 public class vTrackWeight {
 
@@ -85,18 +107,26 @@ public class vTrackWeight {
         iv1.setFitHeight(100);
         iv1.setPreserveRatio(true);
 
+        ObservableList<XYChart.Series<Date, Number>> series = FXCollections.observableArrayList();
+        final ObservableList<XYChart.Data<Date, Number>> series1Data = FXCollections.observableArrayList();
+        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2012, 11, 15).getTime(), 67));
+        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2014, 5, 3).getTime(), 55));
+        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 0, 3).getTime(), 65));
 
-        series = new XYChart.Series();
+        series.add(new XYChart.Series<>("Series1", series1Data));
 
-        //defining the axes
-        NumberAxis xAxis = new NumberAxis();
-        NumberAxis yAxis = new NumberAxis();
-        // dateAxis.setLabel("Date");
+        NumberAxis numberAxis = new NumberAxis();
+        DateAxis dateAxis = new DateAxis();
+        LineChart<Date, Number> lineChart = new LineChart<>(dateAxis, numberAxis, series);
+        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2015, 1, 2, 0, 0, 0).getTime(), 33));
+            }
+        });
 
-        //creating the chart
-        LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-        lineChart.getData().add(series);
-        lineChart.setMaxHeight(300);
+        lineChart.setData(series);
+
 
         dp = new DatePicker(LocalDate.now());
 
@@ -136,19 +166,17 @@ public class vTrackWeight {
         vb.setAlignment(BASELINE_CENTER);
 
 
-
-        HBox hb = new HBox(tblView, vb);
+        HBox hb = new HBox(tblView, vb, lineChart);
         hb.setPadding(new Insets(10, 50, 50, 50));
 
-
-        VBox vb = new VBox(iv1, hb);
+        // don't know why the chart is not showing!!!
+        VBox vb = new VBox(iv1, label1, label2, hb);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
-
         root.getChildren().addAll(vb);
-        //everything goes wrong when you add the linechart in!!!
+
     }
 
 
@@ -187,10 +215,7 @@ public class vTrackWeight {
             label2 = new Label("Weight change " + "kg         Remaining ");
         }
 
-        // series = null; need to clear this not keep adding to it as when weight deleted still in series
-        for (Weight w : alltheWeight) {
-            series.getData().add(new XYChart.Data(w.getDate().toString(), w.getCurrentWeight()));
-        }
+
 
     }
 
@@ -214,33 +239,6 @@ public class vTrackWeight {
         parent.setDisable(false);
         stage.close();
     }
-
-//    private LineChart<Date, Number> createHourChart() {
-//        NumberAxis numberAxis = new NumberAxis();
-//        DateAxis dateAxis = new DateAxis();
-//        LineChart<Date, Number> lineChart = new LineChart<DateAxis, Number>(dateAxis, numberAxis);
-//
-//        ObservableList<XYChart.Series<Date, Number>> series = FXCollections.observableArrayList();
-//
-//        final XYChart.Series<Date, Number> series1 = new XYChart.Series<>();
-//        ObservableList<XYChart.Data<Date, Number>> series1Data = FXCollections.observableArrayList();
-//        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 1, 9, 3, 1).getTime(), 2));
-//        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 1, 22, 4, 2).getTime(), 4));
-//        series1.setName("Series 1");
-//        series1.setData(series1Data);
-//
-//        series.add(series1);
-//        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//
-//            @Override
-//            public void handle(MouseEvent t) {
-//                series1.getData().add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 1, 2, 10, 0, 0).getTime(), 80d));
-//
-//            }
-//        });
-//        lineChart.setData(series);
-//        return lineChart;
-//    }
 
 
 }
