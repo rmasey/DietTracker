@@ -17,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.converter.IntegerStringConverter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -34,8 +35,6 @@ public class vMain {
     private static TextField txtFieldFoodName;
     private static TextField txtFieldCalories;
     private static TextField txtFieldDateEaten;
-
-
 
 
     public vMain(Pane theParent, User selectedUser) {
@@ -70,9 +69,7 @@ public class vMain {
         trackWeightBtn.setOnAction((ActionEvent ae) -> openStageFour(root, selectedUser));
 
         DatePicker dp = new DatePicker();
-        dp.setValue( LocalDate.now() );
-
-
+        dp.setValue(LocalDate.now());
 
 
         TableView<Consumption> tvTable = new TableView<Consumption>();
@@ -85,11 +82,11 @@ public class vMain {
         //get all data for the table
         loadItemsinTable(selectedUser, tvTable);
 
-        TableColumn <Consumption, String> mealNameCol = new TableColumn<>("Meal");
+        TableColumn<Consumption, String> mealNameCol = new TableColumn<>("Meal");
         mealNameCol.setCellValueFactory(new PropertyValueFactory<Consumption, String>("MealName"));
         mealNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         // for this to be called user must hit return after changing the data!
-       mealNameCol.setOnEditCommit((e) -> mealNameCol_OnEditCommit(e, selectedUser, tvTable));
+        mealNameCol.setOnEditCommit((e) -> mealNameCol_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(mealNameCol);
 
 
@@ -102,7 +99,8 @@ public class vMain {
 
         TableColumn caloriesCol = new TableColumn<>("Calories");
         caloriesCol.setCellValueFactory(new PropertyValueFactory<>("Calories"));
-        //caloriesCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        // note the extra but IntegerStringConverter since its a calories is a number
+        caloriesCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         // for this to be called user must hit return after changing the data!
         caloriesCol.setOnEditCommit((e) -> caloriesCol_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(caloriesCol);
@@ -159,34 +157,29 @@ public class vMain {
 
     }
 
-    public void terminate()
-    {
+    public void terminate() {
         System.exit(0);
     }
 
-    public void openStageFour(Pane parent, User selectedUser)
-    {
+    public void openStageFour(Pane parent, User selectedUser) {
         vTrackWeight newStage = new vTrackWeight(parent, selectedUser);
     }
 
-    public void mealNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
-    {
+    public void mealNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable) {
         System.out.println("Updating database...");
 
-        TableColumn.CellEditEvent<Consumption, String>ce;
+        TableColumn.CellEditEvent<Consumption, String> ce;
         ce = (TableColumn.CellEditEvent<Consumption, String>) e;
 
-        try
-        {
-            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set MealName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
-            statement.setString(1,ce.getNewValue());
+        try {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set MealName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() + " ");
+            statement.setString(1, ce.getNewValue());
 
             if (statement != null) {
                 vLogin.database.executeUpdate(statement);
             }
 
-        }
-        catch (SQLException resultsexception) {
+        } catch (SQLException resultsexception) {
             System.out.println("Database result processing error: " + resultsexception.getMessage());
         }
 
@@ -195,24 +188,21 @@ public class vMain {
 
     }
 
-    public void foodNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
-    {
+    public void foodNameCol_OnEditCommit(Event e, User selectedUser, TableView tvTable) {
         System.out.println("Updating database...");
 
-        TableColumn.CellEditEvent<Consumption, String>ce;
+        TableColumn.CellEditEvent<Consumption, String> ce;
         ce = (TableColumn.CellEditEvent<Consumption, String>) e;
 
-        try
-        {
-            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set FoodName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
-            statement.setString(1,ce.getNewValue());
+        try {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set FoodName = ? WHERE consumptionID =" + selectedItem.getConsumptionID() + " ");
+            statement.setString(1, ce.getNewValue());
 
             if (statement != null) {
                 vLogin.database.executeUpdate(statement);
             }
 
-        }
-        catch (SQLException resultsexception) {
+        } catch (SQLException resultsexception) {
             System.out.println("Database result processing error: " + resultsexception.getMessage());
         }
 
@@ -220,24 +210,23 @@ public class vMain {
 
     }
 
-    public void caloriesCol_OnEditCommit(Event e, User selectedUser, TableView tvTable)
-    {
+    public void caloriesCol_OnEditCommit(Event e, User selectedUser, TableView tvTable) {
+
         System.out.println("Updating database...");
 
-        TableColumn.CellEditEvent<Consumption, String>ce;
-        ce = (TableColumn.CellEditEvent<Consumption, String>) e;
+        //bit diferent as Calories is a number
+        TableColumn.CellEditEvent<Consumption, Integer> ce;
+        ce = (TableColumn.CellEditEvent<Consumption, Integer>) e;
 
-        try
-        {
-            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set Calories = ? WHERE consumptionID =" + selectedItem.getConsumptionID() +" ");
-            statement.setString(1,ce.getNewValue());
+        try {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set Calories = ? WHERE consumptionID =" + selectedItem.getConsumptionID() + " ");
+            statement.setString(1, ce.getNewValue().toString());
 
             if (statement != null) {
                 vLogin.database.executeUpdate(statement);
             }
 
-        }
-        catch (SQLException resultsexception) {
+        } catch (SQLException resultsexception) {
             System.out.println("Database result processing error: " + resultsexception.getMessage());
         }
 

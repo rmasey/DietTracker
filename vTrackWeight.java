@@ -24,8 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import sun.util.calendar.LocalGregorianCalendar;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 
 //import java.sql.Date;
@@ -35,7 +34,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 import static java.time.LocalDate.*;
 import static javafx.geometry.Pos.BASELINE_CENTER;
@@ -81,7 +79,10 @@ public class vTrackWeight {
     private static Label label2;
     private static Weight currentlySelectedWeight = null;
     private static Button deleteWeightBtn;
-    private static XYChart.Series series;
+
+    private static  LineChart<Date, Number> lineChart;
+    private static ObservableList<XYChart.Series<Date, Number>> series;
+    private static  ObservableList<XYChart.Data<Date, Number>> seriesData;
 
 
     public vTrackWeight(Pane theParent, User selectedUser) {
@@ -107,28 +108,10 @@ public class vTrackWeight {
         iv1.setFitHeight(100);
         iv1.setPreserveRatio(true);
 
-        ObservableList<XYChart.Series<Date, Number>> series = FXCollections.observableArrayList();
-        final ObservableList<XYChart.Data<Date, Number>> series1Data = FXCollections.observableArrayList();
-        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2012, 11, 15).getTime(), 67));
-        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2014, 5, 3).getTime(), 55));
-        series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2013, 0, 3).getTime(), 65));
-
-        series.add(new XYChart.Series<>("Series1", series1Data));
-
-        NumberAxis numberAxis = new NumberAxis();
-        DateAxis dateAxis = new DateAxis();
-        LineChart<Date, Number> lineChart = new LineChart<>(dateAxis, numberAxis, series);
-        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent t) {
-                series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2015, 1, 2, 0, 0, 0).getTime(), 33));
-            }
-        });
-
-        lineChart.setData(series);
-
-
         dp = new DatePicker(LocalDate.now());
+
+
+
 
         txtFieldCurrentWeight = new TextField();
         txtFieldCurrentWeight.setPromptText("Current weight in KG");
@@ -160,6 +143,21 @@ public class vTrackWeight {
 
         loadData(selectedUser, tblView);
 
+
+        //create line chart
+        series = FXCollections.observableArrayList();
+        seriesData = FXCollections.observableArrayList();
+
+        loadLineChart(selectedUser);
+
+        NumberAxis numberAxis = new NumberAxis();
+        DateAxis dateAxis = new DateAxis();
+        lineChart = new LineChart<>(dateAxis, numberAxis, series);
+        lineChart.setData(series);
+
+
+
+
         vb = new VBox(dp, txtFieldCurrentWeight, createWeightBtn, deleteWeightBtn);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
@@ -169,13 +167,14 @@ public class vTrackWeight {
         HBox hb = new HBox(tblView, vb, lineChart);
         hb.setPadding(new Insets(10, 50, 50, 50));
 
-        // don't know why the chart is not showing!!!
+
         VBox vb = new VBox(iv1, label1, label2, hb);
         vb.setPadding(new Insets(10, 50, 50, 50));
         vb.setSpacing(10);
         vb.setAlignment(BASELINE_CENTER);
 
         root.getChildren().addAll(vb);
+
 
     }
 
@@ -193,17 +192,22 @@ public class vTrackWeight {
         //re-load data into table view with new item showing
 
         loadData(selectedUser, tblView);
+        loadLineChart(selectedUser);
+
     }
 
     public void loadData(User selectedUser, TableView tblView) {
 
-
+        //get all the Weights from the database
         List<Weight> alltheWeight = WeightDAO.selectAll(selectedUser.getUserID());
         ObservableList options = FXCollections.observableArrayList(alltheWeight);
+        //set the tblView to show all Weights
         tblView.setItems(options);
 
+        //
         int selectedUserID = selectedUser.getUserID();
 
+        //
         if (alltheWeight.size() != 0) {
             int lastItem = alltheWeight.size() - 1;
             int startWeight = alltheWeight.get(lastItem).getCurrentWeight();
@@ -216,10 +220,10 @@ public class vTrackWeight {
         }
 
 
-
     }
 
     private void deleteSelectedItem(User selectedUser, TableView tblView) {
+
         // if there is not a selected weight return
         if (currentlySelectedWeight == null) {
             return;
@@ -230,6 +234,10 @@ public class vTrackWeight {
 
         //re-load all the weight data
         loadData(selectedUser, tblView);
+
+        //re-load the line chart with the updated data
+        loadLineChart(selectedUser);
+
     }
 
 
@@ -238,6 +246,31 @@ public class vTrackWeight {
         //enable parent again and close this stage
         parent.setDisable(false);
         stage.close();
+    }
+
+    public static void loadLineChart(User selectedUser){
+
+        // get rid of all previous data
+        seriesData.clear();
+
+        // get all the Weight objects
+        List<Weight> alltheWeight = WeightDAO.selectAll(selectedUser.getUserID());
+
+        // for each weight object get the current weight, year, month and day
+        // need to subtract 1 from month as in DateAxis class Jan is 0
+        for (Weight w : alltheWeight) {
+            LocalDate ld = w.getDate().toLocalDate();
+            int year = ld.getYear();
+            int month = ld.getMonthValue() - 1;
+            int day = ld.getDayOfMonth();
+            int weight = w.getCurrentWeight();
+            seriesData.add(new XYChart.Data<Date, Number>(new GregorianCalendar(year, month, day).getTime(), weight));
+        }
+
+        //add all the data to the chart
+        series.add(new XYChart.Series<>("Weight", seriesData));
+
+
     }
 
 
