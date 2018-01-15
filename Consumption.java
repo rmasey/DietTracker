@@ -1,4 +1,4 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Consumption
 {
@@ -7,9 +7,9 @@ public class Consumption
   private String mealName;
   private String foodName;
   private int calories;
-    private Date dateEaten;
+    private LocalDate dateEaten;
 
-    public Consumption(int consumptionID, int userID, String mealName, String foodName, int calories, Date dateEaten) {
+    public Consumption(int consumptionID, int userID, String mealName, String foodName, int calories, LocalDate dateEaten) {
         this.consumptionID = consumptionID;
         this.userID = userID;
         this.mealName = mealName;
@@ -70,11 +70,11 @@ public class Consumption
         this.calories = calories;
     }
 
-    public Date getDateEaten() {
+    public LocalDate getDateEaten() {
         return dateEaten;
     }
 
-    public void setDateEaten(Date dateEaten) {
+    public void setDateEaten(LocalDate dateEaten) {
         this.dateEaten = dateEaten;
     }
 }

@@ -18,7 +18,7 @@ public class ConsumptionDAO {
                 ResultSet results = vLogin.database.executeQuery(statement);
                 if (results != null) {
                     while (results.next()) {
-                        targetList.add(new Consumption(results.getInt("ConsumptionID"), results.getInt("userID"),results.getString("mealName"), results.getString("foodName"), results.getInt("calories"), results.getDate("dateEaten")));
+                        targetList.add(new Consumption(results.getInt("ConsumptionID"), results.getInt("userID"),results.getString("mealName"), results.getString("foodName"), results.getInt("calories"), results.getDate("dateEaten").toLocalDate()));
                     }
                 }
             }
@@ -34,11 +34,13 @@ public class ConsumptionDAO {
         PreparedStatement statement;
 
         try{
-            statement = vLogin.database.newStatement("INSERT INTO Consumption (userID, mealName, foodName, calories) VALUES (?, ?, ?, ?)");
+            statement = vLogin.database.newStatement("INSERT INTO Consumption (userID, mealName, foodName, calories, DateEaten) VALUES (?, ?, ?, ?, ?)");
             statement.setInt(1, itemToSave.getUserID());
             statement.setString(2, itemToSave.getMealName());
             statement.setString(3, itemToSave.getFoodName());
             statement.setInt(4, itemToSave.getCalories());
+            statement.setDate (5,java.sql.Date.valueOf(itemToSave.getDateEaten()));
+
 
             if (statement != null) {
                 vLogin.database.executeUpdate(statement);
@@ -62,6 +64,8 @@ public class ConsumptionDAO {
             System.out.println("Database deletion error: " + resultsException.getMessage());
         }
     }
+
+
 
 
 }

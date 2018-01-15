@@ -1,4 +1,3 @@
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,11 +16,15 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.converter.DateStringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import javafx.util.converter.LocalDateStringConverter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Month;
+import java.util.Date;
 import java.util.List;
 
 import static javafx.geometry.Pos.BASELINE_CENTER;
@@ -90,24 +93,28 @@ public class vMain {
         tvTable.getColumns().add(mealNameCol);
 
 
-        TableColumn foodNameCol = new TableColumn<>("Food Name");
-        foodNameCol.setCellValueFactory(new PropertyValueFactory<>("foodName"));
+        TableColumn<Consumption, String> foodNameCol = new TableColumn<>("Food Name");
+        foodNameCol.setCellValueFactory(new PropertyValueFactory<Consumption, String>("foodName"));
         foodNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         // for this to be called user must hit return after changing the data!
         foodNameCol.setOnEditCommit((e) -> foodNameCol_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(foodNameCol);
 
-        TableColumn caloriesCol = new TableColumn<>("Calories");
-        caloriesCol.setCellValueFactory(new PropertyValueFactory<>("Calories"));
+        TableColumn<Consumption, Integer> caloriesCol = new TableColumn<>("Calories");
+        caloriesCol.setCellValueFactory(new PropertyValueFactory<Consumption, Integer>("Calories"));
         // note the extra but IntegerStringConverter since its a calories is a number
         caloriesCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         // for this to be called user must hit return after changing the data!
         caloriesCol.setOnEditCommit((e) -> caloriesCol_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(caloriesCol);
 
-        TableColumn dateEaten = new TableColumn<>("Date Eaten");
-        dateEaten.setCellValueFactory(new PropertyValueFactory<>("dateEaten"));
+
+        TableColumn<Consumption, Date> dateEaten = new TableColumn<>("Date Eaten");
+        dateEaten.setCellValueFactory(new PropertyValueFactory<Consumption, Date>("dateEaten"));
+        //dateEaten.setCellFactory(TextFieldTableCell.forTableColumn(new DateStringConverter()));
+        dateEaten.setOnEditCommit((e) -> dateEaten_OnEditCommit(e, selectedUser, tvTable));
         tvTable.getColumns().add(dateEaten);
+
 
         txtFieldMealName = new TextField();
         txtFieldMealName.setLayoutX(200);
@@ -234,6 +241,29 @@ public class vMain {
 
     }
 
+    public void dateEaten_OnEditCommit(Event e, User selectedUser, TableView tvTable) {
+
+        System.out.println("Updating database...");
+
+        TableColumn.CellEditEvent<Consumption, String> ce;
+        ce = (TableColumn.CellEditEvent<Consumption, String>) e;
+
+        try {
+            PreparedStatement statement = vLogin.database.newStatement("UPDATE Consumption set DateEaten = ? WHERE consumptionID =" + selectedItem.getConsumptionID() + " ");
+            statement.setString(1, ce.getNewValue().toString());
+
+            if (statement != null) {
+                vLogin.database.executeUpdate(statement);
+            }
+
+        } catch (SQLException resultsexception) {
+            System.out.println("Database result processing error: " + resultsexception.getMessage());
+        }
+
+        loadItemsinTable(selectedUser, tvTable);
+
+    }
+
 
     public void addItem(User selectedUser, TableView tvTable) {
         //get the UserID
@@ -245,10 +275,13 @@ public class vMain {
         //get the calories
         int calories = Integer.parseInt(txtFieldCalories.getText());
         //get the date
-        //java.sql.Date dateEaten = txtFieldDateEaten.getText();
-        java.sql.Date dateEaten = java.sql.Date.valueOf(LocalDate.now());
-
-        //something wrong with the
+        String inputYear = txtFieldDateEaten.getText().substring(0, 4);
+        String inputMonth = txtFieldDateEaten.getText().substring(5, 7);
+        String inputDayOfMonth = txtFieldDateEaten.getText().substring(8);
+        int year = Integer.parseInt(inputYear);
+        int month = Integer.parseInt(inputMonth);
+        int dayOfMonth = Integer.parseInt(inputDayOfMonth);
+        LocalDate dateEaten = LocalDate.of( year , month , dayOfMonth );
 
 
         //call save method from ConsumptionDAO using data above
